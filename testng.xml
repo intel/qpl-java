@@ -1,0 +1,10 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="TestAll">
+    <test name="qpl-java-basic">
+        <classes>
+            <class name="com.intel.qpl.QPLJobTest" />
+            <class name="com.intel.qpl.QPLUtilsTest" />
+        </classes>
+    </test>
+</suite>
