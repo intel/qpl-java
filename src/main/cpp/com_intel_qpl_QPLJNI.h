@@ -18,56 +18,59 @@ extern "C" {
  * Method:    initIDs
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_intel_qpl_QPLJNI_initIDs
-  (JNIEnv *, jclass);
+JNIEXPORT void JNICALL Java_com_intel_qpl_QPLJNI_initIDs(JNIEnv *, jclass);
 
 /*
  * Class:     com_intel_qpl_QPLJNI
  * Method:    getQPLJobSize
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_com_intel_qpl_QPLJNI_getQPLJobSize
-  (JNIEnv *, jclass, jint);
+JNIEXPORT jint JNICALL Java_com_intel_qpl_QPLJNI_getQPLJobSize(JNIEnv *, jclass,
+                                                               jint);
 
 /*
  * Class:     com_intel_qpl_QPLJNI
  * Method:    initQPLJob
  * Signature: (ILjava/nio/ByteBuffer;)V
  */
-JNIEXPORT void JNICALL Java_com_intel_qpl_QPLJNI_initQPLJob
-  (JNIEnv *, jclass, jint, jobject);
+JNIEXPORT void JNICALL Java_com_intel_qpl_QPLJNI_initQPLJob(JNIEnv *, jclass,
+                                                            jint, jobject);
 
 /*
  * Class:     com_intel_qpl_QPLJNI
  * Method:    execute
- * Signature: (Lcom/intel/qpl/QPLJob;[BLjava/nio/ByteBuffer;II[BLjava/nio/ByteBuffer;II)I
+ * Signature:
+ * (Lcom/intel/qpl/QPLJob;[BLjava/nio/ByteBuffer;II[BLjava/nio/ByteBuffer;II)I
  */
-JNIEXPORT jint JNICALL Java_com_intel_qpl_QPLJNI_execute
-  (JNIEnv *, jclass, jobject, jbyteArray, jobject, jint, jint, jbyteArray, jobject, jint, jint);
+JNIEXPORT jint JNICALL Java_com_intel_qpl_QPLJNI_execute(JNIEnv *, jclass,
+                                                         jobject, jbyteArray,
+                                                         jobject, jint, jint,
+                                                         jbyteArray, jobject,
+                                                         jint, jint);
 
 /*
  * Class:     com_intel_qpl_QPLJNI
  * Method:    finish
  * Signature: (Ljava/nio/ByteBuffer;)V
  */
-JNIEXPORT void JNICALL Java_com_intel_qpl_QPLJNI_finish
-  (JNIEnv *, jclass, jobject);
+JNIEXPORT void JNICALL Java_com_intel_qpl_QPLJNI_finish(JNIEnv *, jclass,
+                                                        jobject);
 
 /*
  * Class:     com_intel_qpl_QPLJNI
  * Method:    isExecutionPathAvailable
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_com_intel_qpl_QPLJNI_isExecutionPathAvailable
-  (JNIEnv *, jclass, jint);
+JNIEXPORT jint JNICALL
+Java_com_intel_qpl_QPLJNI_isExecutionPathAvailable(JNIEnv *, jclass, jint);
 
 /*
  * Class:     com_intel_qpl_QPLJNI
  * Method:    isCompressionLevelSupported
  * Signature: (II)I
  */
-JNIEXPORT jint JNICALL Java_com_intel_qpl_QPLJNI_isCompressionLevelSupported
-  (JNIEnv *, jclass, jint, jint);
+JNIEXPORT jint JNICALL Java_com_intel_qpl_QPLJNI_isCompressionLevelSupported(
+    JNIEnv *, jclass, jint, jint);
 
 #ifdef __cplusplus
 }

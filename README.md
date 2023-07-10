@@ -13,8 +13,9 @@ This library will allow Java* applications to communicate with the Intel® Query
 ### PREREQUISITES TO BUILD ###
 The following are the prerequisites for building this Java library:
 
-1. Intel® QPL library - To build, Intel® QPL follow [System Requirements](https://intel.github.io/qpl/documentation/get_started_docs/installation.html) and [Installation](https://intel.github.io/qpl/documentation/get_started_docs/installation.html).
-2. Java 11 or above
+1. Intel® QPL library - To build, Intel® QPL follow [Installation](https://intel.github.io/qpl/documentation/get_started_docs/installation.html).
+   Make sure Intel® QPL library installed into either "/usr/local/lib64" or "/usr/local/lib".
+2. Java 8 or above
 3. Build tools - **g++**, **CMake** and **Maven**
 
 
@@ -23,24 +24,42 @@ This library assumes the availability of Intel® IAA hardware.
 
 For more information about the Intel&reg; In-Memory Analytics Accelerator, refer to the [IAA spec](https://cdrdv2.intel.com/v1/dl/getContent/721858) on the [Intel&reg; 64 and IA-32 Architectures Software Developer Manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html) page.
 
-### STEPS TO BUILD AND RUN TESTS ###
+### STEPS TO BUILD ###
 Once all the prerequisites have been satisfied:
    ```
    $ git clone https://github.com/intel/qpl-java.git
    $ cd qpl-java
-   $ mvn clean
-   $ mvn compile
-   $ mvn test
-   $ mvn package
+   $ mvn clean package
    ```
 
 Available Maven commands include:
 
 - `compile` - builds sources
 - `test` - builds and runs tests
+- `site` - generates Surefire report into ```target/site```
 - `javadoc:javadoc` - builds javadocs into ```target/site/apidocs```
 - `package` - builds jar file into ```target``` directory
 
+### LIBRARY TESTING ###
+This library supports both functional and Fuzz testing.
+
+##### FUNCTIONAL TEST #####
+To run all the functional tests, execute the following command:
+```
+mvn clean test
+```
+##### FUZZ TEST #####
+Jazzer tool is used to enable fuzz testing on this project.
+
+see [here](https://github.com/CodeIntelligenceTesting/jazzer/blob/main/CONTRIBUTING.md) for Jazzer dependencies.
+
+
+To run the Fuzz tests, execute the following command:
+```
+mvn clean test -Dfuzzing=true
+```
+The above command executes each Jazzer Fuzz tests for 10 seconds.
+To run for a longer duration, modify ```-max_total_time``` fuzzParameter in pom.xml
 ### USING THIS LIBRARY IN EXISTING JAVA APPLICATIONS ###
 To use this library in your Java application, build the qpl-java jar and include
 its location in your Java classpath.  For example:

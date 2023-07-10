@@ -9,9 +9,10 @@ package com.intel.qpl;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
 
-
 /**
  * Defines general intel QPL JOB APIs to perform specific tasks based on configured operation types.
+ *
+ * This class is not thread safe.
  */
 public class QPLJob {
     private int compressionLevel = 1;
@@ -38,6 +39,24 @@ public class QPLJob {
         int size = QPLJNI.getQPLJobSize(executionPath.getExecutionPathCode());
         this.jobBuffer = ByteBuffer.allocateDirect(size);
         QPLJNI.initQPLJob(executionPath.getExecutionPathCode(), this.jobBuffer);
+    }
+
+    /**
+     * Provides the maximum length of compressed output based on the source length.
+     * @param srcLen source length
+     * @return maximum compressed length for given source length
+     * @throws IllegalArgumentException if the Source length is less than one or too large.
+     */
+    public static int maxCompressedLength(int srcLen) {
+        //TODO: Modify this method once qpl provides API to return Maximum compressed length for given source size.
+        if (srcLen <= 0) {
+          throw new IllegalArgumentException("Source length must be > 0, got " + srcLen);
+        }
+        int dstLen = srcLen + (srcLen >> 12) + (srcLen >> 14) + (srcLen >> 25) + 13;
+        if (dstLen <= 0) {
+          throw new IllegalArgumentException("The source length is too large");
+        }
+        return dstLen;
     }
 
     /**

@@ -20,7 +20,9 @@ public class QPLUtils {
 
     /**
      * This property determines whether operations are executed on the IAA hardware or emulated in software. There are three [options]: hardware, software and auto.
-     *
+     * <p>
+     * Warning: The implementation of Auto Path is in progress.
+     * </p>
      * @see <a href="https://intel.github.io/qpl/documentation/introduction_docs/introduction.html#execution-paths">Intel QPL Execution paths</a>
      * @see <a href="https://intel.github.io/qpl/documentation/dev_ref_docs/c_ref/c_enums_and_structures.html?highlight=operation%20types#c.qpl_path_t">Execution path enum</a>
      */
@@ -130,8 +132,8 @@ public class QPLUtils {
     static final String QPL_JOB_INVALID = "QPLJob is invalid.";
 
     static void validateByteArray(byte[] src, int offset, int length) {
-        if (length < 0)
-            throw new IllegalArgumentException("length must be >= 0");
+        if (length <= 0)
+            throw new IllegalArgumentException("length must be > 0");
 
         if (offset < 0 || offset >= src.length)
             throw new ArrayIndexOutOfBoundsException(offset);

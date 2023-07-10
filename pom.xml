@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.intel.qpl</groupId>
     <artifactId>qpl-java</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
     <packaging>jar</packaging>
     <name>qpl-java</name>
-    <description>This project will provide JNI wrapper to communicate with the Intel® Query Processing Library, for use with Intel® In-Memory Analytics Accelerator, to improve the performance of compression and decompression operation.
+    <description>This project will provide JNI wrapper to communicate with the Intel® Query Processing Library, for use
+        with Intel® In-Memory Analytics Accelerator, to improve the performance of compression and decompression
+        operation.
     </description>
+    <url>https://github.com/intel/qpl-java</url>
 
     <licenses>
         <license>
@@ -31,10 +34,230 @@
             <organizationUrl></organizationUrl>
         </developer>
     </developers>
+    <scm>
+        <connection>scm:git:git://github.com/intel/qpl-java.git</connection>
+        <developerConnection>scm:git:git@github.com:intel/qpl-java.git</developerConnection>
+        <url>https://github.com/intel/qpl-java/tree/main</url>
+    </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
+        <!--suppress UnresolvedMavenProperty -->
+        <skipTests>${fuzzing}</skipTests>
+        <fuzzParameters>-max_total_time=10 -max_len=2147483647</fuzzParameters>
     </properties>
+    <profiles>
+        <profile>
+            <id>fuzz</id>
+            <activation>
+                <property>
+                    <name>fuzzing</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <executions>
+                            <execution>
+                                <id>CompressDecompressBAFuzzer</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>${project.build.directory}/qpl-java-1.0.0.jar</argument>
+                                        <argument>-cp</argument>
+                                        <classpath/>
+                                        <argument>com.code_intelligence.jazzer.Jazzer</argument>
+                                        <argument>
+                                            --target_class=com.intel.qpl.fuzzing.CompressDecompressBAFuzzer
+                                        </argument>
+                                        <argument>--asan</argument>
+                                        <argument>--native</argument>
+                                        <commandlineArgs>${fuzzParameters}</commandlineArgs>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>CompressDecompressBAWithParametersFuzzer</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>${project.build.directory}/qpl-java-1.0.0.jar</argument>
+                                        <argument>-cp</argument>
+                                        <classpath/>
+                                        <argument>com.code_intelligence.jazzer.Jazzer</argument>
+                                        <argument>
+                                            --target_class=com.intel.qpl.fuzzing.CompressDecompressBAWithParametersFuzzer
+                                        </argument>
+                                        <argument>--asan</argument>
+                                        <argument>--native</argument>
+                                        <argument>--jvm_args=-Xmx5048m</argument>
+                                        <commandlineArgs>${fuzzParameters}</commandlineArgs>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>CompressDecompressBBFuzzer</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>${project.build.directory}/qpl-java-1.0.0.jar</argument>
+                                        <argument>-cp</argument>
+                                        <classpath/>
+                                        <argument>com.code_intelligence.jazzer.Jazzer</argument>
+                                        <argument>--target_class=com.intel.qpl.fuzzing.CompressDecompressBBFuzzer
+                                        </argument>
+                                        <argument>--asan</argument>
+                                        <argument>--native</argument>
+                                        <commandlineArgs>${fuzzParameters}</commandlineArgs>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>CompressDecompressDBBFuzzer</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>${project.build.directory}/qpl-java-1.0.0.jar</argument>
+                                        <argument>-cp</argument>
+                                        <classpath/>
+                                        <argument>com.code_intelligence.jazzer.Jazzer</argument>
+                                        <argument>--target_class=com.intel.qpl.fuzzing.CompressDecompressDBBFuzzer
+                                        </argument>
+                                        <argument>--asan</argument>
+                                        <argument>--native</argument>
+                                        <commandlineArgs>${fuzzParameters}</commandlineArgs>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>CompressDecompressSrcBBDstDBBFuzzer</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>${project.build.directory}/qpl-java-1.0.0.jar</argument>
+                                        <argument>-cp</argument>
+                                        <classpath/>
+                                        <argument>com.code_intelligence.jazzer.Jazzer</argument>
+                                        <argument>
+                                            --target_class=com.intel.qpl.fuzzing.CompressDecompressSrcBBDstDBBFuzzer
+                                        </argument>
+                                        <argument>--asan</argument>
+                                        <argument>--native</argument>
+                                        <commandlineArgs>${fuzzParameters}</commandlineArgs>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>CompressDecompressSrcDBBDstBBFuzzer</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>${project.build.directory}/qpl-java-1.0.0.jar</argument>
+                                        <argument>-cp</argument>
+                                        <classpath/>
+                                        <argument>com.code_intelligence.jazzer.Jazzer</argument>
+                                        <argument>
+                                            --target_class=com.intel.qpl.fuzzing.CompressDecompressSrcDBBDstBBFuzzer
+                                        </argument>
+                                        <argument>--asan</argument>
+                                        <argument>--native</argument>
+                                        <commandlineArgs>${fuzzParameters}</commandlineArgs>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>CompressDecompressSrcRODstBBFuzzer</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>${project.build.directory}/qpl-java-1.0.0.jar</argument>
+                                        <argument>-cp</argument>
+                                        <classpath/>
+                                        <argument>com.code_intelligence.jazzer.Jazzer</argument>
+                                        <argument>
+                                            --target_class=com.intel.qpl.fuzzing.CompressDecompressSrcRODstBBFuzzer
+                                        </argument>
+                                        <argument>--asan</argument>
+                                        <argument>--native</argument>
+                                        <commandlineArgs>${fuzzParameters}</commandlineArgs>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>CompressDifferentCLAndRCFuzzer</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>${project.build.directory}/qpl-java-1.0.0.jar</argument>
+                                        <argument>-cp</argument>
+                                        <classpath/>
+                                        <argument>com.code_intelligence.jazzer.Jazzer</argument>
+                                        <argument>--target_class=com.intel.qpl.fuzzing.CompressDifferentCLAndRCFuzzer
+                                        </argument>
+                                        <argument>--asan</argument>
+                                        <argument>--native</argument>
+                                        <commandlineArgs>${fuzzParameters}</commandlineArgs>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <build>
         <resources>
             <resource>
@@ -42,130 +265,198 @@
             </resource>
         </resources>
         <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.5.1</version>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.8</version>
-                    <executions>
-                        <execution>
-                            <id>build-cpp</id>
-                            <phase>generate-sources</phase>
-                            <configuration>
-                                <tasks>
-                                    <mkdir dir="${project.build.directory}/cppbuild"/>
-                                    <exec executable="cmake" dir="${project.build.directory}/cppbuild" failonerror="true">
-                                        <arg line="${basedir}/src/main/cpp "/>
-                                    </exec>
-                                    <exec executable="make" dir="${project.build.directory}/cppbuild" failonerror="true">
-                                        <arg line="VERBOSE=1"/>
-                                    </exec>
-                                    <copy file="${project.build.directory}/cppbuild/libqpl-java.so"
-					    tofile="${project.build.directory}/classes/com/intel/qpl/linux/${os.arch}/libqpl-java.so"/>
-                                </tasks>
-                            </configuration>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>clean-native</id>
-                            <phase>clean</phase>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                            <configuration>
-                                <target>
-                                    <echo>Builddir: ${project.build.directory}</echo>
-                                    <echo>Basedir: ${basedir}</echo>
-                                    <delete dir="${project.build.directory}/cppbuild"/>
-                                </target>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
-                    <configuration>
-                        <argLine>@{argLine} -Djava.library.path=${project.build.directory}/cppbuild</argLine>
-                        <suiteXmlFiles>
-                            <suiteXmlFile>testng.xml</suiteXmlFile>
-                        </suiteXmlFiles>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>2.2.1</version>
-                    <executions>
-                        <execution>
-                            <id>attach-sources</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.1.1</version>
-                    <configuration>
-                        <source>8</source>
-                        <javadocVersion>1.0.0</javadocVersion>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>attach-javadocs</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.8</version>
-                    <configuration>
-                        <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
-                        <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>jacoco-initialize</id>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>jacoco-report</id>
-                            <phase>test</phase>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>build-cpp</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <taskdef resource="net/sf/antcontrib/antcontrib.properties"
+                                         classpathref="maven.plugin.classpath"/>
+                                <if>
+                                    <!--suppress UnresolvedMavenProperty -->
+                                    <equals arg1="${fuzzing}" arg2="true"/>
+                                    <then>
+                                        <mkdir dir="${project.build.directory}/cppbuild"/>
+                                        <exec executable="cmake" dir="${project.build.directory}/cppbuild"
+                                              failonerror="true">
+                                            <arg line="${basedir}/src/main/cpp -DSANITIZE_MEMORY=[ON]"/>
+                                        </exec>
+                                        <exec executable="make" dir="${project.build.directory}/cppbuild"
+                                              failonerror="true">
+                                            <arg line="VERBOSE=1"/>
+                                        </exec>
+                                        <copy file="${project.build.directory}/cppbuild/libqpl-java.so"
+                                              tofile="${project.build.directory}/classes/com/intel/qpl/linux/${os.arch}/libqpl-java.so"/>
+                                    </then>
+                                    <else>
+                                        <mkdir dir="${project.build.directory}/cppbuild"/>
+                                        <exec executable="cmake" dir="${project.build.directory}/cppbuild"
+                                              failonerror="true">
+                                            <arg line="${basedir}/src/main/cpp"/>
+                                        </exec>
+                                        <exec executable="make" dir="${project.build.directory}/cppbuild"
+                                              failonerror="true">
+                                            <arg line="VERBOSE=1"/>
+                                        </exec>
+                                        <copy file="${project.build.directory}/cppbuild/libqpl-java.so"
+                                              tofile="${project.build.directory}/classes/com/intel/qpl/linux/${os.arch}/libqpl-java.so"/>
+                                    </else>
+                                </if>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>clean-native</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo>Builddir: ${project.build.directory}</echo>
+                                <echo>Basedir: ${basedir}</echo>
+                                <delete dir="${project.build.directory}/cppbuild"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>ant-contrib</groupId>
+                        <artifactId>ant-contrib</artifactId>
+                        <version>1.0b3</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>ant</groupId>
+                                <artifactId>ant</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
+                <configuration>
+                    <argLine>@{argLine} -Djava.library.path=${project.build.directory}/cppbuild</argLine>
+                    <includes>
+                        <include>com.intel.qpl.junit.QPLTestSuite.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>4.0.0-M8</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.4.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <source>8</source>
+                    <javadocVersion>1.0.0</javadocVersion>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <configuration>
+                    <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+                    <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
     <dependencies>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>7.7.1</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.9.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>1.9.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.code-intelligence</groupId>
+            <artifactId>jazzer</artifactId>
+            <version>0.16.1</version>
+        </dependency>
     </dependencies>
-
 </project>

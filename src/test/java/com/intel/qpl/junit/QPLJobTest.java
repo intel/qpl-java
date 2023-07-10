@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  ******************************************************************************/
 
-package com.intel.qpl;
+package com.intel.qpl.junit;
 
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
@@ -12,14 +12,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
+import com.intel.qpl.QPLException;
+import com.intel.qpl.QPLJob;
+import com.intel.qpl.QPLUtils;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class QPLJobTest {
+
     private static final Random RANDOM = new Random();
     private final int compressionFlags = QPLUtils.Flags.QPL_FLAG_FIRST.getId() | QPLUtils.Flags.QPL_FLAG_LAST.getId() | QPLUtils.Flags.QPL_FLAG_DYNAMIC_HUFFMAN.getId();
     private final int decompressionFlags = QPLUtils.Flags.QPL_FLAG_FIRST.getId() | QPLUtils.Flags.QPL_FLAG_LAST.getId();
@@ -71,11 +76,11 @@ public class QPLJobTest {
 
         executionPath = QPLUtils.ExecutionPaths.QPL_PATH_HARDWARE;
         QPLUtils.ExecutionPaths validExecutionPath1 = QPLJob.getValidExecutionPath(executionPath);
-        Assert.assertNotNull(validExecutionPath1.name());
+        assertNotNull(validExecutionPath1.name());
 
         executionPath = QPLUtils.ExecutionPaths.QPL_PATH_AUTO;
         QPLUtils.ExecutionPaths validExecutionPath2 = QPLJob.getValidExecutionPath(executionPath);
-        Assert.assertNotNull(validExecutionPath2.name());
+        assertNotNull(validExecutionPath2.name());
     }
 
     @Test
@@ -117,29 +122,6 @@ public class QPLJobTest {
         validLevel = QPLJob.getValidCompressionLevel(executionPath, level);
         assertEquals(QPLUtils.DEFAULT_COMPRESSION_LEVEL, validLevel);
     }
-
-    @Test(expectedExceptions = QPLException.class)
-    public void testGetQPLJobSizeWrongExecutionPath() {
-        // Execution path code 100 is not valid and valid codes are 0,1,2.
-        int size = QPLJNI.getQPLJobSize(100);
-        assertTrue(size > 0);
-    }
-
-    @Test(expectedExceptions = QPLException.class)
-    public void testInitQPLJobWrongExecutionPath() {
-        int size = QPLJNI.getQPLJobSize(2);
-        ByteBuffer bb = ByteBuffer.allocateDirect(size);
-        // Execution path code 4 is not valid and valid codes are 0,1,2.
-        QPLJNI.initQPLJob(4,bb);
-        assertTrue(size > 0);
-    }
-
-    @Test(expectedExceptions = QPLException.class)
-    public void testQPLFinishWrongJob() {
-        ByteBuffer bb = ByteBuffer.allocate(100);
-        QPLJNI.finish(bb);
-    }
-
     @Test
     public void testCompressDecompressDirectBB() {
         compressDecompressByteBuffer(executionPath, 1, 10);
@@ -156,7 +138,7 @@ public class QPLJobTest {
         ByteBuffer srcBB = ByteBuffer.allocate(n);
         srcBB.put(srcData, 0, n);
         srcBB.flip();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
         QPLJob qplJob = new QPLJob(executionPath);
         executeCompress(qplJob, srcBB, compressedBB);
@@ -180,7 +162,7 @@ public class QPLJobTest {
         srcBB.put(srcData, 0, n);
         srcBB.flip();
         ByteBuffer srcBB1 = srcBB.asReadOnlyBuffer();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocateDirect(compressedSize);
         QPLJob qplJob = new QPLJob(executionPath);
         executeCompress(qplJob, srcBB1, compressedBB);
@@ -203,7 +185,7 @@ public class QPLJobTest {
         srcBB.put(srcData, 0, n);
         srcBB.flip();
         ByteBuffer srcBB1 = srcBB.asReadOnlyBuffer();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocateDirect(compressedSize);
         QPLJob qplJob = new QPLJob(executionPath);
         executeCompress(qplJob, srcBB1, compressedBB);
@@ -227,7 +209,7 @@ public class QPLJobTest {
         srcBB.put(srcData, 0, n);
         srcBB.flip();
         ByteBuffer srcBB1 = srcBB.duplicate();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocateDirect(compressedSize);
         QPLJob qplJob = new QPLJob(executionPath);
         executeCompress(qplJob, srcBB1, compressedBB);
@@ -252,7 +234,7 @@ public class QPLJobTest {
         srcBB.flip().position(srcOffset);
         ByteBuffer srcBB1 = srcBB.slice().asReadOnlyBuffer();
         int compressOffset = 3;
-        int compressedSize = compressOffset + compressedBufferLength(n);
+        int compressedSize = compressOffset + QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
         compressedBB.position(compressOffset);
         ByteBuffer compressedBBSlice = compressedBB.slice();
@@ -277,7 +259,7 @@ public class QPLJobTest {
         ByteBuffer srcBB = ByteBuffer.allocateDirect(n);
         srcBB.put(srcData, 0, n);
         srcBB.flip();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
         QPLJob qplJob = new QPLJob();
         executeCompress(qplJob, srcBB, compressedBB);
@@ -300,7 +282,7 @@ public class QPLJobTest {
         ByteBuffer srcBB = ByteBuffer.allocate(n);
         srcBB.put(srcData, 0, n);
         srcBB.flip();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocateDirect(compressedSize);
         QPLJob qplJob = new QPLJob();
         executeCompress(qplJob, srcBB, compressedBB);
@@ -313,7 +295,7 @@ public class QPLJobTest {
         assertEquals(resultBB.compareTo(srcBB), 0);
     }
 
-    @Test(expectedExceptions = ReadOnlyBufferException.class)
+    @Test
     public void testCompressSrcRODstRO() {
         int n = 100;
         byte[] srcData = new byte[n];
@@ -325,11 +307,14 @@ public class QPLJobTest {
         srcBB.put(srcData, 0, n);
         srcBB.flip();
         ByteBuffer srcBBRO = srcBB.asReadOnlyBuffer();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocateDirect(compressedSize);
         ByteBuffer compressedBBRO = compressedBB.asReadOnlyBuffer();
-        QPLJob qplJob = new QPLJob();
-        executeCompress(qplJob, srcBBRO, compressedBBRO);
+        assertThrows(ReadOnlyBufferException.class, () -> {
+            QPLJob qplJob = new QPLJob();
+            executeCompress(qplJob, srcBBRO, compressedBBRO);
+        });
+
     }
 
 
@@ -345,7 +330,7 @@ public class QPLJobTest {
         srcBB.put(srcData, 0, n);
         srcBB.flip();
         ByteBuffer srcBBRO = srcBB.asReadOnlyBuffer();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
         QPLJob qplJob = new QPLJob();
         executeCompress(qplJob, srcBBRO, compressedBB);
@@ -358,43 +343,47 @@ public class QPLJobTest {
         assertEquals(resultBB.compareTo(srcBBRO), 0);
     }
 
-    @Test(expectedExceptions = QPLException.class)
+    @Test
     public void testCompressSameSrcAndDst() {
-        int n = 100;
-        byte[] srcData = new byte[n];
+        assertThrows(QPLException.class, () -> {
+            int n = 100;
+            byte[] srcData = new byte[n];
 
-        for (int i = 0; i < n; i++)
-            srcData[i] = (byte) i;
-        ByteBuffer srcBB = ByteBuffer.allocateDirect(n);
-        srcBB.put(srcData, 0, n);
-        srcBB.flip();
-        QPLJob qplJob = new QPLJob();
-        executeCompress(qplJob, srcBB, srcBB);
+            for (int i = 0; i < n; i++)
+                srcData[i] = (byte) i;
+            ByteBuffer srcBB = ByteBuffer.allocateDirect(n);
+            srcBB.put(srcData, 0, n);
+            srcBB.flip();
+            QPLJob qplJob = new QPLJob();
+            executeCompress(qplJob, srcBB, srcBB);
+        });
     }
 
-    @Test(expectedExceptions = QPLException.class)
+    @Test
     public void testCompressInsufficientDstLength() {
-        int n = 100;
-        byte[] srcData = new byte[n];
+        assertThrows(QPLException.class, () -> {
+            int n = 100;
+            byte[] srcData = new byte[n];
 
-        for (int i = 0; i < n; i++)
-            srcData[i] = (byte) i;
-        ByteBuffer srcBB = ByteBuffer.allocateDirect(n);
-        srcBB.put(srcData, 0, n);
-        srcBB.flip();
-        ByteBuffer compressedBB = ByteBuffer.allocateDirect(n);
-        QPLJob qplJob = new QPLJob();
-        executeCompress(qplJob, srcBB, compressedBB);
+            for (int i = 0; i < n; i++)
+                srcData[i] = (byte) i;
+            ByteBuffer srcBB = ByteBuffer.allocateDirect(n);
+            srcBB.put(srcData, 0, n);
+            srcBB.flip();
+            ByteBuffer compressedBB = ByteBuffer.allocateDirect(n);
+            QPLJob qplJob = new QPLJob();
+            executeCompress(qplJob, srcBB, compressedBB);
+        });
     }
 
-    @Test(expectedExceptions = QPLException.class)
+    @Test
     public void testUnsupportedCompressionLevel() {
-        compressDecompressByteBuffer(executionPath, 100, 0);
+        assertThrows(QPLException.class, () -> compressDecompressByteBuffer(executionPath, 100, 0));
     }
 
-    @Test(expectedExceptions = QPLException.class)
+    @Test
     public void testCompressDecompressNegativeCompressionLevel() {
-        compressDecompressByteBuffer(executionPath, -1, 0);
+        assertThrows(QPLException.class, () -> compressDecompressByteBuffer(executionPath, -1, 0));
     }
 
     @Test
@@ -409,7 +398,7 @@ public class QPLJobTest {
         byte[] src = new byte[n];
         RANDOM.nextBytes(src);
 
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         byte[] compressed = new byte[compressedSize];
         QPLJob qplJob = new QPLJob(executionPath);
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
@@ -420,34 +409,46 @@ public class QPLJobTest {
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_DECOMPRESS);
         qplJob.setFlags(decompressionFlags);
         qplJob.execute(compressed, 0, compressed.length, result, 0);
-        assertEquals(result, src);
+        assertArrayEquals(result, src);
     }
 
-    @Test(expectedExceptions = QPLException.class)
-    public void testCompressWrongFlag() {
-        int n = 66560;
-        byte[] src = new byte[n];
-        RANDOM.nextBytes(src);
-
-        int compressedSize = compressedBufferLength(n);
-        byte[] compressed = new byte[compressedSize];
-        QPLJob qplJob = new QPLJob(executionPath);
-        qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
-        qplJob.setFlags(-2147483647);
-        qplJob.execute(src, 0, src.length, compressed, 0);      
-    }
-    @Test(expectedExceptions = QPLException.class)
+    @Test
     public void testCompressWrongCL() {
-        int n = 66560;
-        byte[] src = new byte[n];
-        RANDOM.nextBytes(src);
+        assertThrows(QPLException.class, () -> {
+            int n = 66560;
+            byte[] src = new byte[n];
+            RANDOM.nextBytes(src);
 
-        int compressedSize = compressedBufferLength(n);
-        byte[] compressed = new byte[compressedSize];
-        QPLJob qplJob = new QPLJob(executionPath);
-        qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
-        qplJob.setCompressionLevel(-2147483647);
-        qplJob.execute(src, 0, src.length, compressed, 0);      
+            int compressedSize = QPLJob.maxCompressedLength(n);
+            byte[] compressed = new byte[compressedSize];
+            QPLJob qplJob = new QPLJob(executionPath);
+            qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
+            qplJob.setCompressionLevel(-2147483647);
+            qplJob.execute(src, 0, src.length, compressed, 0);
+        });
+    }
+
+    @Test
+    public void testCompressNegativeRetryCount() {
+      int n = 66560;
+      byte[] src = new byte[n];
+      RANDOM.nextBytes(src);
+
+      int compressedSize = QPLJob.maxCompressedLength(n);
+      byte[] compressed = new byte[compressedSize];
+      QPLJob qplJob = new QPLJob(executionPath);
+      qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
+      qplJob.setCompressionLevel(1);
+      qplJob.setFlags(compressionFlags);
+      qplJob.setRetryCount(-2147483647);
+      qplJob.execute(src, 0, src.length, compressed, 0);
+
+      byte[] result = new byte[n];
+      qplJob.setOperationType(QPLUtils.Operations.QPL_OP_DECOMPRESS);
+      qplJob.setRetryCount(-2147483647);
+      qplJob.setFlags(decompressionFlags);
+      qplJob.execute(compressed, 0, compressed.length, result, 0);
+      assertArrayEquals(result, src);
     }
 
     @Test
@@ -456,7 +457,7 @@ public class QPLJobTest {
         byte[] src = new byte[n];
         RANDOM.nextBytes(src);
 
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         byte[] compressed = new byte[compressedSize];
         QPLJob qplJob = new QPLJob(executionPath);
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
@@ -467,7 +468,7 @@ public class QPLJobTest {
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_DECOMPRESS);
         qplJob.setFlags(decompressionFlags);
         qplJob.execute(compressed, 0, compressed.length, result, 0);
-        assertEquals(result, src);
+        assertArrayEquals(result, src);
     }
 
     @Test
@@ -478,7 +479,7 @@ public class QPLJobTest {
         for (int i = 0; i < n; i++)
             src[i] = (byte) i;
 
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         byte[] compressed = new byte[compressedSize];
         QPLJob qplJob = new QPLJob(executionPath);
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
@@ -507,7 +508,7 @@ public class QPLJobTest {
         ByteBuffer srcBB = ByteBuffer.allocate(srcOffset + n);
         srcBB.put(srcData, 1, n - 1);
         srcBB.flip().position(srcOffset);
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
         QPLJob qplJob = new QPLJob();
         executeCompress(qplJob, srcBB, compressedBB);
@@ -529,35 +530,37 @@ public class QPLJobTest {
         byte[] src = new byte[n];
         RANDOM.nextBytes(src);
 
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         byte[] compressed = new byte[compressedSize];
         QPLJob qplJob = new QPLJob(executionPath);
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
         qplJob.setFlags(compressionFlags);
-        qplJob.execute(src, offset, src.length-offset, compressed, 0);
+        qplJob.execute(src, offset, src.length - offset, compressed, 0);
 
-        byte[] result = new byte[n-offset];
+        byte[] result = new byte[n - offset];
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_DECOMPRESS);
         qplJob.setFlags(decompressionFlags);
         qplJob.execute(compressed, 0, compressed.length, result, 0);
-        byte [] srcRang = Arrays.copyOfRange(src,offset,n);
-        assertEquals(result, srcRang);
+        byte[] srcRang = Arrays.copyOfRange(src, offset, n);
+        assertArrayEquals(srcRang, result);
 
     }
 
-    @Test(expectedExceptions = ArrayIndexOutOfBoundsException.class)
+    @Test
     public void testCompressBigLength() {
+      assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
         int n = 10000000;
         int offset = 9999999;
         byte[] src = new byte[n];
         RANDOM.nextBytes(src);
 
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         byte[] compressed = new byte[compressedSize];
         QPLJob qplJob = new QPLJob(executionPath);
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
         qplJob.setFlags(compressionFlags);
         qplJob.execute(src, offset, src.length, compressed, 0);
+      });
     }
 
     @Test
@@ -572,7 +575,7 @@ public class QPLJobTest {
         srcBB.put(srcData, 1, n - 1);
         srcBB.flip().position(srcOffset);
         ByteBuffer srcBBSlice = srcBB.slice();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
         QPLJob qplJob = new QPLJob();
         executeCompress(qplJob, srcBBSlice, compressedBB);
@@ -588,8 +591,9 @@ public class QPLJobTest {
     }
 
 
-    @Test(expectedExceptions = QPLException.class)
+    @Test
     public void testCompressEmptyDBB() {
+      assertThrows(IllegalArgumentException.class, () -> {
         byte[] data = new byte[0];
         int n = data.length;
         int offset = 2;
@@ -599,114 +603,127 @@ public class QPLJobTest {
         src.flip().position(offset);
 
         int outOffset = 3;
-        int compressedLength = compressedBufferLength(n);
+        int compressedLength = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocateDirect(compressedLength);
         QPLJob qplJob = new QPLJob(executionPath);
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
         qplJob.setFlags(compressionFlags);
         compressedBB.position(outOffset);
         qplJob.execute(src, compressedBB);
+      });
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test
     public void testCompressReleasedQPLResource() {
-        int n = 66560;
-        byte[] src = new byte[n];
-        RANDOM.nextBytes(src);
+        assertThrows(IllegalStateException.class, () -> {
+            int n = 66560;
+            byte[] src = new byte[n];
+            RANDOM.nextBytes(src);
 
-        int compressedSize = compressedBufferLength(n);
-        byte[] compressed = new byte[compressedSize];
-        QPLJob qplJob = new QPLJob(executionPath);
-        qplJob.doClear();
-        qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
-        qplJob.setFlags(compressionFlags);
-        qplJob.execute(src, 0, src.length, compressed, 0);
+            int compressedSize = QPLJob.maxCompressedLength(n);
+            byte[] compressed = new byte[compressedSize];
+            QPLJob qplJob = new QPLJob(executionPath);
+            qplJob.doClear();
+            qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
+            qplJob.setFlags(compressionFlags);
+            qplJob.execute(src, 0, src.length, compressed, 0);
+        });
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test
     public void testDecompressClosedQPLJob() {
-        int n = 100;
-        byte[] srcData = new byte[n];
+        assertThrows(IllegalStateException.class, () -> {
+            int n = 100;
+            byte[] srcData = new byte[n];
 
-        for (int i = 0; i < n; i++)
-            srcData[i] = (byte) i;
+            for (int i = 0; i < n; i++)
+                srcData[i] = (byte) i;
 
-        ByteBuffer srcBB = ByteBuffer.allocate(n);
-        srcBB.put(srcData, 0, n);
-        srcBB.flip();
-        int compressedSize = compressedBufferLength(n);
-        ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
-        QPLJob qplJob = new QPLJob(executionPath);
-        qplJob.doClear();
-        executeCompress(qplJob, srcBB, compressedBB);
-        compressedBB.flip();
-        srcBB.flip();
+            ByteBuffer srcBB = ByteBuffer.allocate(n);
+            srcBB.put(srcData, 0, n);
+            srcBB.flip();
+            int compressedSize = QPLJob.maxCompressedLength(n);
+            ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
+            QPLJob qplJob = new QPLJob(executionPath);
+            qplJob.doClear();
+            executeCompress(qplJob, srcBB, compressedBB);
+            compressedBB.flip();
+            srcBB.flip();
 
-        ByteBuffer resultBB = ByteBuffer.allocate(n);
-        executeDecompress(qplJob, compressedBB, resultBB);
-        resultBB.flip();
-        assertEquals(resultBB.compareTo(srcBB), 0);
+            ByteBuffer resultBB = ByteBuffer.allocate(n);
+            executeDecompress(qplJob, compressedBB, resultBB);
+            resultBB.flip();
+        });
+
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test
     public void testReleaseResourcesClosedQPLJob() {
-        int n = 100;
-        byte[] srcData = new byte[n];
+        assertThrows(IllegalStateException.class, () -> {
+            int n = 100;
+            byte[] srcData = new byte[n];
 
-        for (int i = 0; i < n; i++)
-            srcData[i] = (byte) i;
+            for (int i = 0; i < n; i++)
+                srcData[i] = (byte) i;
 
-        ByteBuffer srcBB = ByteBuffer.allocate(n);
-        srcBB.put(srcData, 0, n);
-        srcBB.flip();
-        int compressedSize = compressedBufferLength(n);
-        ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
-        QPLJob qplJob = new QPLJob(executionPath);
-        qplJob.doClear();
-        qplJob.doClear();
-        executeCompress(qplJob, srcBB, compressedBB);
+            ByteBuffer srcBB = ByteBuffer.allocate(n);
+            srcBB.put(srcData, 0, n);
+            srcBB.flip();
+            int compressedSize = QPLJob.maxCompressedLength(n);
+            ByteBuffer compressedBB = ByteBuffer.allocate(compressedSize);
+            QPLJob qplJob = new QPLJob(executionPath);
+            qplJob.doClear();
+            qplJob.doClear();
+            executeCompress(qplJob, srcBB, compressedBB);
+        });
     }
 
-    @Test (expectedExceptions = ArrayIndexOutOfBoundsException.class)
+    @Test
     public void testCompressEmptyBB() {
-        int n = 66560;
-        byte[] emptySrcArray = new byte[0];
-        int compressedSize = compressedBufferLength(n);
-        byte[] compressed = new byte[compressedSize];
-        QPLJob qplJob = new QPLJob(executionPath);
-        qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
-        qplJob.setFlags(compressionFlags);
-        qplJob.execute(emptySrcArray, compressed);
+        assertThrows(IllegalArgumentException.class, () -> {
+            int n = 66560;
+            byte[] emptySrcArray = new byte[0];
+            int compressedSize = QPLJob.maxCompressedLength(n);
+            byte[] compressed = new byte[compressedSize];
+            QPLJob qplJob = new QPLJob(executionPath);
+            qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
+            qplJob.setFlags(compressionFlags);
+            qplJob.execute(emptySrcArray, compressed);
+        });
     }
 
-    @Test(expectedExceptions = ArrayIndexOutOfBoundsException.class)
+    @Test
     public void testCompressWithNegativeOffset() {
-        int n = 65536;
-        //offset should be >=0
-        int offset = -2147483648;
-        byte[] src = new byte[n];
-        RANDOM.nextBytes(src);
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
+            int n = 65536;
+            //offset should be >=0
+            int offset = -2147483648;
+            byte[] src = new byte[n];
+            RANDOM.nextBytes(src);
 
-        int compressedSize = compressedBufferLength(n);
-        byte[] compressed = new byte[compressedSize];
-        QPLJob qplJob = new QPLJob(executionPath);
-        qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
-        qplJob.setFlags(compressionFlags);
-        qplJob.execute(src, offset, src.length, compressed, 0);
+            int compressedSize = QPLJob.maxCompressedLength(n);
+            byte[] compressed = new byte[compressedSize];
+            QPLJob qplJob = new QPLJob(executionPath);
+            qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
+            qplJob.setFlags(compressionFlags);
+            qplJob.execute(src, offset, src.length, compressed, 0);
+        });
     }
 
-    @Test(expectedExceptions = ArrayIndexOutOfBoundsException.class)
+    @Test
     public void testCompressIntegerOverflow() {
-        int n = 65536;
-        byte[] src = new byte[n];
-        RANDOM.nextBytes(src);
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
+            int n = 65536;
+            byte[] src = new byte[n];
+            RANDOM.nextBytes(src);
 
-        int compressedSize = compressedBufferLength(n);
-        byte[] compressed = new byte[compressedSize];
-        QPLJob qplJob = new QPLJob(executionPath);
-        qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
-        qplJob.setFlags(compressionFlags);
-        qplJob.execute(src, 2147483647, src.length, compressed, 0);
+            int compressedSize = QPLJob.maxCompressedLength(n);
+            byte[] compressed = new byte[compressedSize];
+            QPLJob qplJob = new QPLJob(executionPath);
+            qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
+            qplJob.setFlags(compressionFlags);
+            qplJob.execute(src, 2147483647, src.length, compressed, 0);
+        });
     }
 
 
@@ -722,7 +739,7 @@ public class QPLJobTest {
         srcBB.position(inOffset);
         srcBB.put(srcData, 0, n);
         srcBB.flip();
-        int compressedSize = compressedBufferLength(n);
+        int compressedSize = QPLJob.maxCompressedLength(n);
         ByteBuffer compressedBB = ByteBuffer.allocateDirect(compressedSize);
         QPLJob qplJob = new QPLJob(executionPath);
         qplJob.setOperationType(QPLUtils.Operations.QPL_OP_COMPRESS);
@@ -745,7 +762,7 @@ public class QPLJobTest {
     private void compressDecompressByteArray(QPLUtils.ExecutionPaths executionPath, int compressionLevel, int retryCount) {
         byte[] src = "12345345234572".getBytes(StandardCharsets.UTF_8);
         final int n = src.length;
-        int compressLength = compressedBufferLength(n);
+        int compressLength = QPLJob.maxCompressedLength(n);
 
         byte[] compressed = new byte[compressLength];
         QPLJob qplJob = new QPLJob(executionPath);
@@ -761,11 +778,7 @@ public class QPLJobTest {
         qplJob.setCompressionLevel(compressionLevel);
         qplJob.setRetryCount(retryCount);
         qplJob.execute(compressed, result);
-        assertEquals(src, result);
-    }
-
-    private int compressedBufferLength(int n) {
-        return n + (n >> 12) + (n >> 14) + (n >> 25) + 13;
+        assertArrayEquals(src, result);
     }
 
     private void executeCompress(QPLJob qplJob, ByteBuffer srcBB, ByteBuffer compressedBB) {

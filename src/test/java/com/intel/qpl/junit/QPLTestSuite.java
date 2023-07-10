@@ -4,15 +4,14 @@
  * SPDX-License-Identifier: MIT
  ******************************************************************************/
 
-#include <jni.h>
+package com.intel.qpl.junit;
 
-#include "qpl/qpl.h"
 
-#ifndef _Included_com_intel_qpl_util
-#define _Included_com_intel_qpl_util
+import org.junit.platform.suite.api.SelectPackages;
+import org.junit.platform.suite.api.Suite;
 
-void throw_exception(JNIEnv *env, const char *arg, jlong status);
+@Suite
+@SelectPackages("com.intel.qpl.junit")
+public class QPLTestSuite {
 
-void throw_exception(JNIEnv *env, const char *arg);
-
-#endif
+}
