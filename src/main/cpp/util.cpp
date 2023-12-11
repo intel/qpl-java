@@ -19,3 +19,11 @@ void throw_exception(JNIEnv *env, const char *arg) {
   jclass clz = env->FindClass("com/intel/qpl/QPLException");
   env->ThrowNew(clz, arg);
 }
+
+
+void throw_ouput_overflow_exception(JNIEnv *env, const char *arg, jlong status) {
+  char buf[256];
+  jclass clz = env->FindClass("com/intel/qpl/QPLOutputOverflowException");
+  std::snprintf(buf, sizeof(buf), "%s. Status code is - %ld", arg, status);
+  env->ThrowNew(clz, buf);
+}

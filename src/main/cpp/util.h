@@ -15,4 +15,7 @@ void throw_exception(JNIEnv *env, const char *arg, jlong status);
 
 void throw_exception(JNIEnv *env, const char *arg);
 
+void throw_ouput_overflow_exception(JNIEnv *env, const char *arg, jlong status);
+
+
 #endif

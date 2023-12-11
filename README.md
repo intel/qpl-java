@@ -15,8 +15,8 @@ The following are the prerequisites for building this Java library:
 
 1. Intel® QPL library - To build, Intel® QPL follow [Installation](https://intel.github.io/qpl/documentation/get_started_docs/installation.html).
    Make sure Intel® QPL library installed into either "/usr/local/lib64" or "/usr/local/lib".
-2. Java 8 or above
-3. Build tools - **g++**, **CMake** and **Maven**
+2. Java 11 or above
+3. Build tools - **g++**, **CMake** , **Maven** and **clang** (for fuzz testing).
 
 
 ### PREREQUISITES TO RUN ###
@@ -39,6 +39,9 @@ Available Maven commands include:
 - `site` - generates Surefire report into ```target/site```
 - `javadoc:javadoc` - builds javadocs into ```target/site/apidocs```
 - `package` - builds jar file into ```target``` directory
+- `spotless:check` - check if source code is formatted well.
+- `spotless:apply` - fixes source code format issues.
+
 
 ### LIBRARY TESTING ###
 This library supports both functional and Fuzz testing.
