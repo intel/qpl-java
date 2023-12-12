@@ -8,9 +8,7 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>qpl-java</name>
-    <description>This project will provide JNI wrapper to communicate with the Intel® Query Processing Library, for use
-        with Intel® In-Memory Analytics Accelerator, to improve the performance of compression and decompression
-        operation.
+    <description>This library will allow Java* applications to communicate with the Intel® Query Processing Library (Intel® QPL) , for use with Intel® In-Memory Analytics Accelerator (Intel® IAA) , to improve performance by accelerating operations like compression and decompression.
     </description>
     <url>https://github.com/intel/qpl-java</url>
 
