@@ -64,6 +64,17 @@ mvn clean test -Dfuzzing=true
 The above command executes each Jazzer Fuzz tests for 10 seconds.
 To run for a longer duration, modify ```-max_total_time``` fuzzParameter in pom.xml
 ### USING THIS LIBRARY IN EXISTING JAVA APPLICATIONS ###
+#### WITH MAVEN ####
+qpl-java is available from the Maven central repository. Add the following dependency to your pom.xml:
+```
+<dependency>
+    <groupId>com.intel.qpl</groupId>
+    <artifactId>qpl-java</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+#### WITH CLASSPATH ####
 To use this library in your Java application, build the qpl-java jar and include
 its location in your Java classpath.  For example:
    ```
