@@ -14,7 +14,7 @@ This library will allow Java* applications to communicate with the Intel® Query
 The following are the prerequisites for building this Java library:
 
 1. Intel® QPL library - To build, Intel® QPL follow [Installation](https://intel.github.io/qpl/documentation/get_started_docs/installation.html).
-   Make sure Intel® QPL library installed into either "/usr/local/lib64" or "/usr/local/lib".
+   Make sure Intel® QPL library installed into either "/usr/local/lib64" or "/usr/local/lib". This library has been tested with Intel® QPL version 1.3.1
 2. Java 11 or Java 17.
 3. Build tools - **g++**, **CMake** , **Maven** and **clang** (for fuzz testing).
 
